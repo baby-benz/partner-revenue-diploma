@@ -1,0 +1,13 @@
+syntax = "proto3";
+
+option java_package = "ru.itmo.eventprocessor.domain.message";
+
+import "google/protobuf/timestamp.proto";
+
+message TransactionEvent {
+  string id = 1;
+  double amount = 2;
+  google.protobuf.Timestamp timestamp = 3;
+  string profile_id = 4;
+  string point_id = 5;
+}
