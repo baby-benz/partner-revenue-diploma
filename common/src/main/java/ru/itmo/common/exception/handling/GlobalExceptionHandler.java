@@ -1,6 +1,7 @@
 package ru.itmo.common.exception.handling;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.MessageSource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -12,6 +13,7 @@ import ru.itmo.common.web.dto.response.DefaultApiErrorResponse;
 
 @RequiredArgsConstructor
 @ControllerAdvice
+@ConditionalOnMissingBean(annotation = ControllerAdvice.class)
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     private final MessageSource messageSource;
 

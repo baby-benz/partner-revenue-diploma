@@ -26,11 +26,11 @@ public class PartnerProfileControllerTest {
 
     @Test
     public void when_postNewProfile_then_created() throws Exception {
-        String partnerProfileName = "sample";
-        PartnerType partnerType = PartnerType.PAYMENT_PARTNER;
+        final String partnerProfileName = "sample";
+        final PartnerType partnerType = PartnerType.PAYMENT_PARTNER;
 
-        CreatePartnerProfileRequest requestObject = new CreatePartnerProfileRequest(partnerProfileName, partnerType);
-        String jsonRequestObject = new ObjectMapper().writeValueAsString(requestObject);
+        final CreatePartnerProfileRequest requestObject = new CreatePartnerProfileRequest(partnerProfileName, partnerType);
+        final String jsonRequestObject = new ObjectMapper().writeValueAsString(requestObject);
 
         mockMvc.perform(post(Endpoint.POST_NEW_PARTNER_PROFILE)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -38,7 +38,11 @@ public class PartnerProfileControllerTest {
         ).andExpectAll(
                 status().isCreated(),
                 content().contentType(MediaType.APPLICATION_JSON),
-                result -> assertDoesNotThrow(() -> UUID.fromString(JsonPath.read(result.getResponse().getContentAsString(), "$.partnerProfileId"))),
+                result -> assertDoesNotThrow(() ->
+                        UUID.fromString(
+                                JsonPath.read(result.getResponse().getContentAsString(), "$.partnerProfileId")
+                        )
+                ),
                 jsonPath("$.name").value(partnerProfileName),
                 jsonPath("$.partnerType").value(partnerType.name())
         );
