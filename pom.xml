@@ -5,7 +5,7 @@
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
-        <version>3.1.0-SNAPSHOT</version>
+        <version>3.0.4</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
@@ -16,9 +16,10 @@
 
     <modules>
         <module>common</module>
+        <module>partner-profile</module>
+        <module>partner-point</module>
         <module>event-processor</module>
-        <module>registration-service</module>
-        <module>revenue_calculator</module>
+        <module>revenue-calculator</module>
         <module>ui</module>
     </modules>
 
