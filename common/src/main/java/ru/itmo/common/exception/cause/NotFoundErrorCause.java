@@ -5,7 +5,8 @@ import org.springframework.http.HttpStatus;
 
 @RequiredArgsConstructor
 public enum NotFoundErrorCause implements HttpErrorCause {
-    PARTNER_PROFILE_NOT_FOUND("partner-profile-not-found");
+    PROFILE_NOT_FOUND("profile-not-found"),
+    POINT_NOT_FOUND("point-not-found");
 
     private final String errorMessageCode;
 
