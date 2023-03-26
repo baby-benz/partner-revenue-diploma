@@ -4,9 +4,9 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import ru.itmo.common.exception.cause.HttpErrorCause;
 
+@Getter
 public class HttpStatusCodeException extends RuntimeException {
     private final HttpErrorCause errorCause;
-    @Getter
     private final String[] messageArgs;
 
     public HttpStatus getStatus() {

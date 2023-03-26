@@ -1,2 +1,3 @@
+ru.itmo.common.configuration.WebClientConfiguration
 ru.itmo.common.configuration.MessageSourceConfiguration
 ru.itmo.common.exception.handling.GlobalExceptionHandler
