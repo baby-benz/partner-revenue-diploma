@@ -10,4 +10,5 @@ public interface PointService {
     CreatedPointSO createPoint(CreatePointSO pointData);
     FullPointSO getPoint(String pointId);
     UpdatedPointSO updatePoint(UpdatePointSO pointData);
+    void checkPointAndProfileMatch(String pointId, String profileId);
 }

@@ -1,0 +1,10 @@
+syntax = "proto3";
+
+option java_package = "ru.itmo.eventprocessor.domain.message";
+
+message CalcInfoMessage {
+  string id = 1;
+  double amount = 2;
+  string profile_id = 3;
+  string point_id = 4;
+}

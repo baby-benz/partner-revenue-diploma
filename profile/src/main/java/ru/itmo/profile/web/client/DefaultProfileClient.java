@@ -15,12 +15,12 @@ public class DefaultProfileClient implements ProfileClient {
     private final int profileServerPort;
 
     @Override
-    public void checkProfile(String profileId) throws HttpStatusCodeException {
+    public void checkProfileExistence(String profileId) throws HttpStatusCodeException {
         var client = WebClient.builder()
                 .clientConnector(clientHttpConnector)
                 .baseUrl("http://localhost:" + profileServerPort)
                 .build();
-        var uriSpec = client.head().uri(InternalEndpoint.GET_PROFILE_EXISTS, profileId);
+        var uriSpec = client.head().uri(InternalEndpoint.HEAD_CHECK_PROFILE, profileId);
 
         uriSpec.retrieve().onStatus(status -> status.equals(HttpStatus.NOT_FOUND), onNotFound -> {
             throw new HttpStatusCodeException(NotFoundErrorCause.PROFILE_NOT_FOUND, profileId);

@@ -2,7 +2,10 @@ package ru.itmo.point.service.impl;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Example;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 import ru.itmo.common.exception.HttpStatusCodeException;
 import ru.itmo.common.exception.cause.NotFoundErrorCause;
 import ru.itmo.common.web.client.ProfileClient;
@@ -26,7 +29,7 @@ public class DefaultPointService implements PointService {
 
     @Override
     public CreatedPointSO createPoint(CreatePointSO pointData) {
-        profileClient.checkProfile(pointData.profileId());
+        profileClient.checkProfileExistence(pointData.profileId());
 
         Point createdPoint = pointRepository.save(
                 new Point(
@@ -70,7 +73,7 @@ public class DefaultPointService implements PointService {
             throw new HttpStatusCodeException(NotFoundErrorCause.POINT_NOT_FOUND, pointData.pointId());
         }
 
-        profileClient.checkProfile(pointData.profileId());
+        profileClient.checkProfileExistence(pointData.profileId());
 
         Point updatedPoint = pointRepository.save(
                 new Point(
@@ -89,5 +92,15 @@ public class DefaultPointService implements PointService {
                 updatedPoint.getPointType(),
                 updatedPoint.getStatus()
         );
+    }
+
+    @Override
+    public void checkPointAndProfileMatch(String pointId, String profileId) {
+        Point point = new Point();
+        point.setId(pointId);
+        point.setProfileId(profileId);
+        if (!pointRepository.exists(Example.of(point))) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        }
     }
 }

@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 
 @SpringBootTest
-public class PutPointControllerTest extends PointControllerTest {
+class PutPointControllerTest extends PointControllerTest {
     final String profileIdToUpdate = "newId";
     final String pointNameToUpdate = "newName";
     final PointType pointTypeToUpdate = PointType.PRODUCT_SELLING;
@@ -40,7 +40,7 @@ public class PutPointControllerTest extends PointControllerTest {
         );
         final String jsonCreatePointRequestObject = objectMapper.writeValueAsString(createPointRequest);
 
-        doNothing().when(profileClient).checkProfile(Mockito.anyString());
+        doNothing().when(profileClient).checkProfileExistence(Mockito.anyString());
 
         var result = mockMvc.perform(post(Endpoint.Point.POST_NEW)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -59,6 +59,7 @@ public class PutPointControllerTest extends PointControllerTest {
 
         mockMvc.perform(put(Endpoint.Point.PUT, pointId)
                 .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
                 .content(jsonUpdatePointRequestObject)
         ).andExpectAll(
                 status().isOk(),
@@ -73,7 +74,7 @@ public class PutPointControllerTest extends PointControllerTest {
 
     @Test
     void when_putPointWithWrongPointId_then_notFoundResponse() throws Exception {
-        doNothing().when(profileClient).checkProfile(Mockito.anyString());
+        doNothing().when(profileClient).checkProfileExistence(Mockito.anyString());
 
         final var updatePointRequest = new UpdatePointRequest(
                 profileIdToUpdate,
@@ -97,6 +98,7 @@ public class PutPointControllerTest extends PointControllerTest {
 
         mockMvc.perform(put(Endpoint.Point.PUT, pointId)
                 .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
                 .content(jsonUpdatePointRequestObject)
         ).andExpectAll(
                 status().isNotFound(),
@@ -109,7 +111,7 @@ public class PutPointControllerTest extends PointControllerTest {
 
     @Test
     void when_putPointWithWrongPointIdAndRuLangHeader_then_notFoundResponse() throws Exception {
-        doNothing().when(profileClient).checkProfile(Mockito.anyString());
+        doNothing().when(profileClient).checkProfileExistence(Mockito.anyString());
 
         final var updatePointRequest = new UpdatePointRequest(
                 profileIdToUpdate,
@@ -134,6 +136,7 @@ public class PutPointControllerTest extends PointControllerTest {
 
         mockMvc.perform(put(Endpoint.Point.PUT, pointId)
                 .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
                 .locale(russianLocale)
                 .content(jsonUpdatePointRequestObject)
         ).andExpectAll(

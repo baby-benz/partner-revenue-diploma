@@ -12,7 +12,7 @@ public class InternalProfileController {
     private final ProfileService profileService;
 
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping(value = InternalEndpoint.GET_PROFILE_EXISTS)
+    @GetMapping(value = InternalEndpoint.HEAD_CHECK_PROFILE)
     public void checkProfile(@PathVariable String profileId) {
         profileService.checkProfile(profileId);
     }
