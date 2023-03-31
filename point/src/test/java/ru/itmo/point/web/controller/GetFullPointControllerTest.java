@@ -18,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-public class GetFullPointControllerTest extends PointControllerTest {
+class GetFullPointControllerTest extends PointControllerTest {
     @Test
     void when_getFullPoint_then_ok() throws Exception {
         final var pointRequestObject = new CreatePointRequest(
@@ -46,6 +46,7 @@ public class GetFullPointControllerTest extends PointControllerTest {
 
         mockMvc.perform(get(Endpoint.Point.GET_FULL, pointId)
                 .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
         ).andExpectAll(
                 status().isOk(),
                 content().contentType(MediaType.APPLICATION_JSON),
@@ -73,6 +74,7 @@ public class GetFullPointControllerTest extends PointControllerTest {
 
         mockMvc.perform(get(Endpoint.Point.GET_FULL, pointId)
                 .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
         ).andExpectAll(
                 status().isNotFound(),
                 result -> assertEquals(

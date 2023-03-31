@@ -5,12 +5,18 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
 public final class Endpoint {
-    public final class Profile {
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static final class Profile {
         public static final String POST_NEW = "/profile";
     }
-    public final class Point {
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static final class Point {
         public static final String POST_NEW = "/point";
         public static final String GET_FULL = "/point/{pointId}";
         public static final String PUT = "/point/{pointId}";
+    }
+    @NoArgsConstructor(access = AccessLevel.PRIVATE)
+    public static final class EventProcessor {
+        public static final String GET_FULL = "/event/{eventId}";
     }
 }

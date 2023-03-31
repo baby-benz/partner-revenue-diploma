@@ -10,4 +10,4 @@ spring:
 
 profile:
   server:
-    port: 8083
+    port: 8080

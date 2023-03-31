@@ -49,18 +49,19 @@ class DefaultProfileClientTest {
 
         var result = mockMvc.perform(post(Endpoint.Profile.POST_NEW)
                 .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
                 .content(jsonRequestObject)
         ).andReturn();
 
         String profileId = JsonPath.read(result.getResponse().getContentAsString(), "$.profileId");
 
-        assertDoesNotThrow(() -> profileClient.checkProfile(profileId));
+        assertDoesNotThrow(() -> profileClient.checkProfileExistence(profileId));
     }
 
     @Test
     void when_noProfile_and_checkProfile_then_notFoundException() {
         var exception = assertThrows(
-                HttpStatusCodeException.class, () -> profileClient.checkProfile("wrongId")
+                HttpStatusCodeException.class, () -> profileClient.checkProfileExistence("wrongId")
         );
         assertEquals(NotFoundErrorCause.PROFILE_NOT_FOUND, exception.getErrorCause());
     }

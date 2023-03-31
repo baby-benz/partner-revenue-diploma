@@ -7,11 +7,9 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import ru.itmo.common.constant.Endpoint;
-import ru.itmo.common.domain.enumeration.Status;
 import ru.itmo.common.exception.HttpStatusCodeException;
 import ru.itmo.common.exception.cause.NotFoundErrorCause;
 import ru.itmo.common.web.dto.response.DefaultApiErrorResponse;
-import ru.itmo.point.domain.enumeration.PointType;
 import ru.itmo.point.web.dto.request.CreatePointRequest;
 
 import java.nio.charset.StandardCharsets;
@@ -27,7 +25,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-public class PostNewPointControllerTest extends PointControllerTest {
+class PostNewPointControllerTest extends PointControllerTest {
     @Test
     void when_postNewPoint_then_created() throws Exception {
         final var pointRequestObject = new CreatePointRequest(
@@ -38,10 +36,11 @@ public class PostNewPointControllerTest extends PointControllerTest {
         );
         final String jsonPointRequestObject = objectMapper.writeValueAsString(pointRequestObject);
 
-        doNothing().when(profileClient).checkProfile(Mockito.anyString());
+        doNothing().when(profileClient).checkProfileExistence(Mockito.anyString());
 
         mockMvc.perform(post(Endpoint.Point.POST_NEW)
                 .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
                 .content(jsonPointRequestObject)
         ).andExpectAll(
                 status().isCreated(),
@@ -81,10 +80,11 @@ public class PostNewPointControllerTest extends PointControllerTest {
 
         doThrow(new HttpStatusCodeException(NotFoundErrorCause.PROFILE_NOT_FOUND, sampleProfileId))
                 .when(profileClient)
-                .checkProfile(Mockito.anyString());
+                .checkProfileExistence(Mockito.anyString());
 
         mockMvc.perform(post(Endpoint.Point.POST_NEW)
                 .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
                 .content(jsonPointRequestObject)
         ).andExpectAll(
                 status().isNotFound(),
@@ -119,10 +119,11 @@ public class PostNewPointControllerTest extends PointControllerTest {
 
         doThrow(new HttpStatusCodeException(NotFoundErrorCause.PROFILE_NOT_FOUND, sampleProfileId))
                 .when(profileClient)
-                .checkProfile(Mockito.anyString());
+                .checkProfileExistence(Mockito.anyString());
 
         mockMvc.perform(post(Endpoint.Point.POST_NEW)
                 .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
                 .locale(russianLocale)
                 .content(jsonPointRequestObject)
         ).andExpectAll(

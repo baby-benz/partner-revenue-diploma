@@ -4,19 +4,20 @@ import com.google.protobuf.InvalidProtocolBufferException;
 import lombok.Getter;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
-import ru.itmo.eventprocessor.domain.message.TransactionEventOuterClass.TransactionEvent;
+import ru.itmo.common.constant.KafkaTopics;
+import ru.itmo.eventprocessor.domain.message.EventStatus.EventStatusMessage;
 
 import java.util.concurrent.CountDownLatch;
 
 @Component
 @Getter
-public class TransactionConsumer {
+public class EventStatusConsumer {
     private final CountDownLatch latch = new CountDownLatch(1);
-    private TransactionEvent eventPayload;
+    private EventStatusMessage eventPayload;
 
-    @KafkaListener(topics = "${kafka.topics.transaction}")
-    public void consumeTransaction(byte[] message) throws InvalidProtocolBufferException {
-        eventPayload = TransactionEvent.parseFrom(message);
+    @KafkaListener(topics = KafkaTopics.EVENT_STATUS)
+    public void consume(byte[] message) throws InvalidProtocolBufferException {
+        eventPayload = EventStatusMessage.parseFrom(message);
         latch.countDown();
     }
 }
