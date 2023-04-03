@@ -1,8 +1,6 @@
 package ru.itmo.eventprocessor;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.json.JsonMapper;
-import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -12,7 +10,6 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -30,7 +27,9 @@ import ru.itmo.eventprocessor.domain.message.CalcInfo.CalcInfoMessage;
 import ru.itmo.eventprocessor.domain.message.Event.EventMessage;
 import ru.itmo.eventprocessor.kafka.consumer.EventConsumer;
 import ru.itmo.eventprocessor.kafka.producer.CalcInfoProducer;
+import ru.itmo.eventprocessor.domain.message.BigDecimal.DecimalValue;
 
+import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.OffsetDateTime;
 import java.time.ZoneId;
@@ -40,12 +39,9 @@ import java.util.Properties;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.doNothing;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @SpringBootTest
 @EmbeddedKafka(partitions = 1, brokerProperties = {"listeners=PLAINTEXT://${spring.kafka.bootstrap-servers}"})
@@ -59,22 +55,18 @@ class EventLifecycleTest {
     EventConsumer consumer;
     @Autowired
     CalcInfoProducer producer;
-    ObjectMapper objectMapper;
+    @MockBean
+    PointClient pointClient;
 
     @Value("${spring.kafka.consumer.group-id")
     private String groupId;
     @Value("${spring.kafka.bootstrap-servers}")
     private String bootstrapServers;
 
-    @MockBean
-    PointClient pointClient;
-
-    Consumer<String, byte[]> calcInfoConsumer;
+    private Consumer<String, byte[]> calcInfoConsumer;
 
     @BeforeEach
-    void initObjectMapper() {
-        objectMapper = JsonMapper.builder().addModule(new JavaTimeModule()).build();
-
+    void init() {
         final Properties props = new Properties();
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
         props.put(ConsumerConfig.GROUP_ID_CONFIG, groupId);
@@ -87,21 +79,24 @@ class EventLifecycleTest {
     @Test
     void whenEventReceived_then_controllerReturnsEvent_and_eventSent() throws Exception {
         final String eventId = UUID.randomUUID().toString();
-        final double amount = 300.d;
+        final BigDecimal amount = BigDecimal.valueOf(300.d);
         final OffsetDateTime timestamp = OffsetDateTime.now(ZoneId.systemDefault());
         final String profileId = UUID.randomUUID().toString();
         final String pointId = UUID.randomUUID().toString();
-        final Status status = Status.NOT_PROCESSED;
 
-        EventMessage message = EventMessage.newBuilder()
+        final DecimalValue amountProto = DecimalValue.newBuilder()
+                .setScale(amount.scale())
+                .setPrecision(amount.precision())
+                .setValue(ByteString.copyFrom(amount.unscaledValue().toByteArray()))
+                .build();
+
+        final EventMessage message = EventMessage.newBuilder()
                 .setId(eventId)
-                .setAmount(amount)
+                .setAmount(amountProto)
                 .setTimestamp(timestamp.toString())
                 .setProfileId(profileId)
                 .setPointId(pointId)
                 .build();
-
-        doNothing().when(pointClient).checkPointAndProfileMatch(Mockito.anyString(), Mockito.anyString());
 
         template.send(KafkaTopics.EVENT, message.toByteArray());
 
@@ -117,11 +112,15 @@ class EventLifecycleTest {
                 status().isOk(),
                 jsonPath("$.eventId").value(eventId),
                 jsonPath("$.amount").value(amount),
-                jsonPath("$.zonedTimestamp").value(CoreMatchers.startsWith(expectedTimestampString.substring(0, 21))),
-                jsonPath("$.zonedTimestamp").value(CoreMatchers.endsWith(expectedTimestampString.substring(33))),
+                jsonPath("$.zonedTimestamp").value(
+                        CoreMatchers.startsWith(expectedTimestampString.substring(0, 21))
+                ),
+                jsonPath("$.zonedTimestamp").value(
+                        CoreMatchers.endsWith(expectedTimestampString.substring(33))
+                ),
                 jsonPath("$.profileId").value(profileId),
                 jsonPath("$.pointId").value(pointId),
-                jsonPath("$.status").value(status.name())
+                jsonPath("$.status").value(Status.NOT_PROCESSED.name())
         );
         assertTrue(messageConsumed);
         assertTrue(messagePublished);
@@ -130,7 +129,7 @@ class EventLifecycleTest {
 
         var expectedCalcInfo = CalcInfoMessage.newBuilder()
                 .setId(eventId)
-                .setAmount(amount)
+                .setAmount(amountProto)
                 .setProfileId(profileId)
                 .setPointId(pointId)
                 .build();

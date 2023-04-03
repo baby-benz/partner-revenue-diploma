@@ -7,5 +7,6 @@ public record FullPointSO(String pointId,
                           String profileId,
                           String name,
                           PointType pointType,
-                          Status status) {
+                          Status status,
+                          String calcSchemeId) {
 }

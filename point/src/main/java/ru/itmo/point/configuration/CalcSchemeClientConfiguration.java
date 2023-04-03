@@ -5,18 +5,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
-import ru.itmo.common.web.client.ProfileClient;
-import ru.itmo.profile.web.client.DefaultProfileClient;
+import ru.itmo.calcscheme.web.client.DefaultCalcSchemeClient;
+import ru.itmo.common.web.client.CalcSchemeClient;
 
 @RequiredArgsConstructor
 @Configuration
-public class ClientConfiguration {
-    @Value("${profile.server.port}")
-    private int profileServerPort;
+public class CalcSchemeClientConfiguration {
+    @Value("${calc-scheme.server.port}")
+    private int calcSchemePort;
     private final ReactorClientHttpConnector clientHttpConnector;
 
     @Bean
-    public ProfileClient profileClient() {
-        return new DefaultProfileClient(clientHttpConnector, profileServerPort);
+    public CalcSchemeClient calcSchemeClient() {
+        return new DefaultCalcSchemeClient(clientHttpConnector, calcSchemePort);
     }
 }

@@ -1,10 +1,12 @@
 syntax = "proto3";
 
+import "big_decimal.proto";
+
 option java_package = "ru.itmo.eventprocessor.domain.message";
 
 message EventMessage {
   string id = 1;
-  double amount = 2;
+  DecimalValue amount = 2;
   string timestamp = 3;
   string profile_id = 4;
   string point_id = 5;

@@ -32,10 +32,12 @@ class DefaultProfileClientTest {
     @Value("${server.port}")
     private int serverPort;
     private ProfileClient profileClient;
+    private ObjectMapper objectMapper;
 
     @BeforeEach
     void initProfileClient() {
         profileClient = new DefaultProfileClient(clientHttpConnector, serverPort);
+        objectMapper = new ObjectMapper();
     }
 
     @Test
@@ -45,7 +47,7 @@ class DefaultProfileClientTest {
         final Status status = Status.INACTIVE;
 
         final CreateProfileRequest requestObject = new CreateProfileRequest(profileName, profileType, status);
-        final String jsonRequestObject = new ObjectMapper().writeValueAsString(requestObject);
+        final String jsonRequestObject = objectMapper.writeValueAsString(requestObject);
 
         var result = mockMvc.perform(post(Endpoint.Profile.POST_NEW)
                 .contentType(MediaType.APPLICATION_JSON)
@@ -59,7 +61,7 @@ class DefaultProfileClientTest {
     }
 
     @Test
-    void when_noProfile_and_checkProfile_then_notFoundException() {
+    void given_wrongProfile_when_checkProfile_then_notFoundException() {
         var exception = assertThrows(
                 HttpStatusCodeException.class, () -> profileClient.checkProfileExistence("wrongId")
         );

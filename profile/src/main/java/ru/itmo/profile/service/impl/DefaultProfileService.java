@@ -1,9 +1,7 @@
 package ru.itmo.profile.service.impl;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import ru.itmo.profile.domain.entity.Profile;
 import ru.itmo.profile.repository.ProfileRepository;
 import ru.itmo.profile.service.ProfileService;
@@ -19,14 +17,14 @@ public class DefaultProfileService implements ProfileService {
 
     @Override
     public CreatedProfileSO createProfile(CreateProfileSO profileData) {
-        Profile createdProfile = profileRepository.save(
-                new Profile(
-                        UUID.randomUUID().toString(),
-                        profileData.name(),
-                        profileData.profileType(),
-                        profileData.status()
-                )
-        );
+        var profileToCreate = new Profile(UUID.randomUUID().toString(), profileData.name(), profileData.profileType());
+
+        if (profileData.status() != null) {
+            profileToCreate.setStatus(profileData.status());
+        }
+
+        Profile createdProfile = profileRepository.save(profileToCreate);
+
         return new CreatedProfileSO(
                 createdProfile.getId(),
                 createdProfile.getName(),
@@ -36,9 +34,7 @@ public class DefaultProfileService implements ProfileService {
     }
 
     @Override
-    public void checkProfile(String profileId) {
-        if (!profileRepository.existsById(profileId)) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
-        }
+    public boolean profileExists(String profileId) {
+        return profileRepository.existsById(profileId);
     }
 }

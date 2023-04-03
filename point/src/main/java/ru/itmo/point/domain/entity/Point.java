@@ -3,6 +3,7 @@ package ru.itmo.point.domain.entity;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -21,20 +22,34 @@ public class Point {
     @Id
     private String id;
 
+    @NotNull
     @Column
     private String name;
 
+    @NotNull
     @Column
     private String profileId;
 
+    @NotNull
     @Column
     private PointType pointType;
 
+    @NotNull
     @Column
-    private Status status;
+    private Status status = Status.INACTIVE;
+
+    @Column
+    private String calcSchemeId;
 
     public Point(String id) {
         this.id = id;
+    }
+
+    public Point(String id, String name, String profileId, PointType pointType) {
+        this.id = id;
+        this.name = name;
+        this.profileId = profileId;
+        this.pointType = pointType;
     }
 
     @Override

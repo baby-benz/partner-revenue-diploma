@@ -6,14 +6,16 @@ import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import ru.itmo.common.domain.enumeration.Status;
 import ru.itmo.profile.domain.enumeration.ProfileType;
 
 import java.util.Objects;
 
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Getter
 @Entity
 public class Profile {
     @Id
@@ -26,10 +28,16 @@ public class Profile {
     private ProfileType profileType;
 
     @Column
-    private Status status;
+    private Status status = Status.INACTIVE;
 
     public Profile(String id) {
         this.id = id;
+    }
+
+    public Profile(String id, String name, ProfileType profileType) {
+        this.id = id;
+        this.name = name;
+        this.profileType = profileType;
     }
 
     @Override

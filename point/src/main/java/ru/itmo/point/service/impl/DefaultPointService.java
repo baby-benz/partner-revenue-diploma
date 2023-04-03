@@ -1,13 +1,13 @@
 package ru.itmo.point.service.impl;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Example;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 import ru.itmo.common.exception.HttpStatusCodeException;
 import ru.itmo.common.exception.cause.NotFoundErrorCause;
+import ru.itmo.common.web.client.CalcSchemeClient;
 import ru.itmo.common.web.client.ProfileClient;
 import ru.itmo.point.domain.entity.Point;
 import ru.itmo.point.repository.PointRepository;
@@ -26,54 +26,79 @@ import java.util.UUID;
 public class DefaultPointService implements PointService {
     private final PointRepository pointRepository;
     private final ProfileClient profileClient;
+    private final CalcSchemeClient calcSchemeClient;
 
     @Override
     public CreatedPointSO createPoint(CreatePointSO pointData) {
         profileClient.checkProfileExistence(pointData.profileId());
 
-        Point createdPoint = pointRepository.save(
-                new Point(
-                        UUID.randomUUID().toString(),
-                        pointData.name(),
-                        pointData.profileId(),
-                        pointData.pointType(),
-                        pointData.status()
-                )
+        var pointToSave = new Point(
+                UUID.randomUUID().toString(),
+                pointData.name(),
+                pointData.profileId(),
+                pointData.pointType()
         );
+
+        if (pointData.status() != null) {
+            pointToSave.setStatus(pointData.status());
+        }
+
+        if (pointData.calcSchemeId() != null) {
+            calcSchemeClient.checkCalcSchemeExistence(pointData.calcSchemeId());
+        }
+
+        Point createdPoint = pointRepository.save(pointToSave);
 
         return new CreatedPointSO(
                 createdPoint.getId(),
                 createdPoint.getProfileId(),
                 createdPoint.getName(),
                 createdPoint.getPointType(),
-                createdPoint.getStatus()
+                createdPoint.getStatus(),
+                createdPoint.getCalcSchemeId()
         );
     }
 
     @Override
     public FullPointSO getPoint(String pointId) {
-        if (!pointRepository.existsById(pointId)) {
+        Point point;
+
+        try {
+            point = pointRepository.getReferenceById(pointId);
+            log.debug("Point to get with id " + pointId + " was successfully found");
+        } catch (EntityNotFoundException e) {
+            log.debug("Point to get with id " + pointId + " was not found");
             throw new HttpStatusCodeException(NotFoundErrorCause.POINT_NOT_FOUND, pointId);
         }
-
-        Point point = pointRepository.getReferenceById(pointId);
 
         return new FullPointSO(
                 point.getId(),
                 point.getProfileId(),
                 point.getName(),
                 point.getPointType(),
-                point.getStatus()
+                point.getStatus(),
+                point.getCalcSchemeId()
         );
     }
 
     @Override
     public UpdatedPointSO updatePoint(UpdatePointSO pointData) {
-        if (!pointRepository.existsById(pointData.pointId())) {
+        try {
+            Point pointToUpdate = pointRepository.getReferenceById(pointData.pointId());
+            log.debug("Point to update with id " + pointData.pointId() + " was successfully found");
+
+            if (!pointData.profileId().equals(pointToUpdate.getProfileId())) {
+                profileClient.checkProfileExistence(pointData.profileId());
+            }
+
+            if ((pointToUpdate.getCalcSchemeId() != null && !pointToUpdate.getCalcSchemeId().equals(pointData.calcSchemeId()))
+                    || pointData.calcSchemeId() != null) {
+                calcSchemeClient.checkCalcSchemeExistence(pointData.calcSchemeId());
+            }
+        } catch (EntityNotFoundException e) {
+            log.debug("Point to update with id " + pointData.pointId() + " was not found");
             throw new HttpStatusCodeException(NotFoundErrorCause.POINT_NOT_FOUND, pointData.pointId());
         }
-
-        profileClient.checkProfileExistence(pointData.profileId());
 
         Point updatedPoint = pointRepository.save(
                 new Point(
@@ -81,7 +106,8 @@ public class DefaultPointService implements PointService {
                         pointData.name(),
                         pointData.profileId(),
                         pointData.pointType(),
-                        pointData.status()
+                        pointData.status(),
+                        pointData.calcSchemeId()
                 )
         );
 
@@ -90,17 +116,48 @@ public class DefaultPointService implements PointService {
                 updatedPoint.getProfileId(),
                 updatedPoint.getName(),
                 updatedPoint.getPointType(),
-                updatedPoint.getStatus()
+                updatedPoint.getStatus(),
+                updatedPoint.getCalcSchemeId()
         );
     }
 
     @Override
-    public void checkPointAndProfileMatch(String pointId, String profileId) {
+    public boolean pointMatchesProfile(String pointId, String profileId) {
         Point point = new Point();
         point.setId(pointId);
         point.setProfileId(profileId);
-        if (!pointRepository.exists(Example.of(point))) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+        return pointRepository.exists(Example.of(point));
+    }
+
+    @Override
+    public UpdatedPointSO setCalcScheme(String pointId, String calcSchemeId) {
+        Point pointToSetCalcScheme;
+
+        try {
+            pointToSetCalcScheme = pointRepository.getReferenceById(pointId);
+            log.debug("Point to set calc scheme with id " + pointId + " was successfully found");
+
+            if (pointToSetCalcScheme.getCalcSchemeId() == null
+                    || !pointToSetCalcScheme.getCalcSchemeId().equals(calcSchemeId)) {
+                log.debug("Checking calc scheme with id " + calcSchemeId + " existence");
+                calcSchemeClient.checkCalcSchemeExistence(calcSchemeId);
+            }
+        } catch (EntityNotFoundException e) {
+            log.debug("Point to set calc scheme with id " + pointId + " was not found");
+            throw new HttpStatusCodeException(NotFoundErrorCause.POINT_NOT_FOUND, pointId);
         }
+
+        pointToSetCalcScheme.setCalcSchemeId(calcSchemeId);
+
+        Point updatedPoint = pointRepository.save(pointToSetCalcScheme);
+
+        return new UpdatedPointSO(
+                updatedPoint.getId(),
+                updatedPoint.getProfileId(),
+                updatedPoint.getName(),
+                updatedPoint.getPointType(),
+                updatedPoint.getStatus(),
+                updatedPoint.getCalcSchemeId()
+        );
     }
 }

@@ -7,5 +7,6 @@ public record CreatedPointSO(String pointId,
                              String profileId,
                              String name,
                              PointType pointType,
-                             Status status) {
+                             Status status,
+                             String calcSchemeId) {
 }
