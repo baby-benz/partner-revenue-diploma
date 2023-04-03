@@ -10,5 +10,6 @@ public interface PointService {
     CreatedPointSO createPoint(CreatePointSO pointData);
     FullPointSO getPoint(String pointId);
     UpdatedPointSO updatePoint(UpdatePointSO pointData);
-    void checkPointAndProfileMatch(String pointId, String profileId);
+    boolean pointMatchesProfile(String pointId, String profileId);
+    UpdatedPointSO setCalcScheme(String pointId, String calcSchemeId);
 }

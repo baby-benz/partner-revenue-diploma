@@ -1,13 +1,10 @@
 package ru.itmo.profile.web.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import ru.itmo.common.constant.Endpoint;
-import ru.itmo.common.domain.enumeration.Status;
-import ru.itmo.profile.domain.enumeration.ProfileType;
 import ru.itmo.profile.web.dto.request.CreateProfileRequest;
 
 import java.util.UUID;
@@ -21,7 +18,7 @@ class PostNewProfileControllerTest extends ProfileControllerTest {
     @Test
     void when_postNewProfile_then_created() throws Exception {
         final var requestObject = new CreateProfileRequest(sampleProfileName, sampleProfileType, sampleStatus);
-        final String jsonRequestObject = new ObjectMapper().writeValueAsString(requestObject);
+        final String jsonRequestObject = objectMapper.writeValueAsString(requestObject);
 
         mockMvc.perform(post(Endpoint.Profile.POST_NEW)
                 .contentType(MediaType.APPLICATION_JSON)

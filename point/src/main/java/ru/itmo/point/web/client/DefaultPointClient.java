@@ -1,6 +1,5 @@
 package ru.itmo.point.web.client;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.client.reactive.ReactorClientHttpConnector;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -9,17 +8,18 @@ import ru.itmo.common.exception.cause.NotFoundErrorCause;
 import ru.itmo.common.web.client.PointClient;
 import ru.itmo.point.constant.InternalEndpoint;
 
-@RequiredArgsConstructor
 public class DefaultPointClient implements PointClient {
-    private final ReactorClientHttpConnector clientHttpConnector;
-    private final int pointServerPort;
+    private final WebClient client;
 
-    @Override
-    public void checkPointAndProfileMatch(String pointId, String profileId) {
-        var client = WebClient.builder()
+    public DefaultPointClient(ReactorClientHttpConnector clientHttpConnector, int pointServerPort) {
+        this.client = WebClient.builder()
                 .clientConnector(clientHttpConnector)
                 .baseUrl("http://localhost:" + pointServerPort)
                 .build();
+    }
+
+    @Override
+    public void checkPointAndProfileMatch(String pointId, String profileId) {
         var uriSpec = client.head().uri(uriBuilder ->
                 uriBuilder.path(InternalEndpoint.HEAD_CHECK_POINT)
                         .queryParam("profileId", profileId)

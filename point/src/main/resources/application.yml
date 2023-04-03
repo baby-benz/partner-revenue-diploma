@@ -8,6 +8,13 @@ spring:
     hibernate:
       ddl-auto: create
 
+server:
+  port: 8081
+
 profile:
   server:
     port: 8080
+
+calc-scheme:
+  server:
+    port: 8082

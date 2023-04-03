@@ -1,8 +1,11 @@
 package ru.itmo.point.web.controller;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.itmo.common.constant.Endpoint;
 import ru.itmo.point.service.PointService;
@@ -17,6 +20,7 @@ import ru.itmo.point.web.dto.response.CreatedPointResponse;
 import ru.itmo.point.web.dto.response.FullPointResponse;
 import ru.itmo.point.web.dto.response.UpdatedPointResponse;
 
+@Validated
 @RequiredArgsConstructor
 @RestController
 public class PointController {
@@ -24,13 +28,14 @@ public class PointController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(value = Endpoint.Point.POST_NEW, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public CreatedPointResponse addPoint(@RequestBody CreatePointRequest pointRequestBody) {
+    public CreatedPointResponse addPoint(@Valid @RequestBody CreatePointRequest pointRequestBody) {
         CreatedPointSO createdPoint = pointService.createPoint(
                 new CreatePointSO(
                         pointRequestBody.profileId(),
                         pointRequestBody.name(),
                         pointRequestBody.pointType(),
-                        pointRequestBody.status()
+                        pointRequestBody.status(),
+                        pointRequestBody.calcSchemeId()
                 )
         );
 
@@ -39,13 +44,14 @@ public class PointController {
                 createdPoint.profileId(),
                 createdPoint.name(),
                 createdPoint.pointType(),
-                createdPoint.status()
+                createdPoint.status(),
+                createdPoint.calcSchemeId()
         );
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping(value = Endpoint.Point.GET_FULL, produces = MediaType.APPLICATION_JSON_VALUE)
-    public FullPointResponse getFullPoint(@PathVariable String pointId) {
+    public FullPointResponse getFullPoint(@NotBlank @PathVariable String pointId) {
         FullPointSO point = pointService.getPoint(pointId);
 
         return new FullPointResponse(
@@ -53,20 +59,22 @@ public class PointController {
                 point.profileId(),
                 point.name(),
                 point.pointType(),
-                point.status()
+                point.status(),
+                point.calcSchemeId()
         );
     }
 
     @ResponseStatus(HttpStatus.OK)
     @PutMapping(value = Endpoint.Point.PUT, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public UpdatedPointResponse updatePoint(@PathVariable String pointId, @RequestBody UpdatePointRequest pointRequestBody) {
+    public UpdatedPointResponse updatePoint(@NotBlank @PathVariable String pointId, @Valid @RequestBody UpdatePointRequest pointRequestBody) {
         UpdatedPointSO updatedPoint = pointService.updatePoint(
                 new UpdatePointSO(
                         pointId,
                         pointRequestBody.profileId(),
                         pointRequestBody.name(),
                         pointRequestBody.pointType(),
-                        pointRequestBody.status()
+                        pointRequestBody.status(),
+                        pointRequestBody.calcSchemeId()
                 )
         );
 
@@ -75,7 +83,23 @@ public class PointController {
                 updatedPoint.profileId(),
                 updatedPoint.name(),
                 updatedPoint.pointType(),
-                updatedPoint.status()
+                updatedPoint.status(),
+                updatedPoint.calcSchemeId()
+        );
+    }
+
+    @ResponseStatus(HttpStatus.OK)
+    @PatchMapping(value = Endpoint.Point.PATCH_CALC_SCHEME, produces = MediaType.APPLICATION_JSON_VALUE)
+    public UpdatedPointResponse setCalcScheme(@NotBlank @PathVariable String pointId, @NotBlank @RequestParam String calcSchemeId) {
+        UpdatedPointSO updatedPoint = pointService.setCalcScheme(pointId, calcSchemeId);
+
+        return new UpdatedPointResponse(
+                updatedPoint.pointId(),
+                updatedPoint.profileId(),
+                updatedPoint.name(),
+                updatedPoint.pointType(),
+                updatedPoint.status(),
+                updatedPoint.calcSchemeId()
         );
     }
 }

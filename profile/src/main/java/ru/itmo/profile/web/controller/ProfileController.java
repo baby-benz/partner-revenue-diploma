@@ -1,5 +1,6 @@
 package ru.itmo.profile.web.controller;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -21,7 +22,7 @@ public class ProfileController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping(value = Endpoint.Profile.POST_NEW, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public CreatedProfileResponse createProfile(@RequestBody CreateProfileRequest profileRequest) {
+    public CreatedProfileResponse createProfile(@Valid @RequestBody CreateProfileRequest profileRequest) {
         CreatedProfileSO createdProfile = profileService.createProfile(
                 new CreateProfileSO(
                         profileRequest.name(),

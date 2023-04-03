@@ -1,14 +1,13 @@
 package ru.itmo.point.web.controller;
 
-import com.jayway.jsonpath.JsonPath;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import ru.itmo.common.constant.Endpoint;
 import ru.itmo.common.exception.cause.NotFoundErrorCause;
 import ru.itmo.common.web.dto.response.DefaultApiErrorResponse;
-import ru.itmo.point.web.dto.request.CreatePointRequest;
 import ru.itmo.point.web.dto.response.FullPointResponse;
+import ru.itmo.point.web.test.Data;
 
 import java.util.Locale;
 
@@ -21,27 +20,15 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 class GetFullPointControllerTest extends PointControllerTest {
     @Test
     void when_getFullPoint_then_ok() throws Exception {
-        final var pointRequestObject = new CreatePointRequest(
-                sampleProfileId,
-                samplePointName,
-                samplePointType,
-                sampleStatus
-        );
-        final String jsonCreatePointRequestObject = objectMapper.writeValueAsString(pointRequestObject);
-
-        var result = mockMvc.perform(post(Endpoint.Point.POST_NEW)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(jsonCreatePointRequestObject)
-        ).andReturn();
-
-        final String pointId = JsonPath.read(result.getResponse().getContentAsString(), "$.pointId");
+        final String pointId = createSamplePoint();
 
         final FullPointResponse expectedPointResponse = new FullPointResponse(
                 pointId,
-                sampleProfileId,
-                samplePointName,
-                samplePointType,
-                sampleStatus
+                Data.SAMPLE_PROFILE_ID,
+                Data.SAMPLE_POINT_NAME,
+                Data.SAMPLE_POINT_TYPE,
+                Data.SAMPLE_STATUS,
+                null
         );
 
         mockMvc.perform(get(Endpoint.Point.GET_FULL, pointId)
@@ -58,7 +45,7 @@ class GetFullPointControllerTest extends PointControllerTest {
     }
 
     @Test
-    void when_getFullPointWithWrongId_then_ok() throws Exception {
+    void when_getFullPoint_with_wrongId_then_notFound() throws Exception {
         String pointId = "wrongId";
 
         final String expectedMessageCode = NotFoundErrorCause.POINT_NOT_FOUND.getMessageCode();

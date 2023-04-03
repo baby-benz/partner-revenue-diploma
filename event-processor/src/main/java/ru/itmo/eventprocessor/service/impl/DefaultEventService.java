@@ -13,7 +13,11 @@ import ru.itmo.eventprocessor.kafka.producer.CalcInfoProducer;
 import ru.itmo.eventprocessor.repository.EventRepository;
 import ru.itmo.eventprocessor.service.EventService;
 import ru.itmo.eventprocessor.service.so.FullEventSO;
+import ru.itmo.eventprocessor.domain.message.BigDecimal.DecimalValue;
 
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.math.MathContext;
 import java.time.*;
 
 @RequiredArgsConstructor
@@ -27,10 +31,16 @@ public class DefaultEventService implements EventService {
     public void process(EventMessage event) {
         pointClient.checkPointAndProfileMatch(event.getPointId(), event.getProfileId());
 
+        DecimalValue amount = event.getAmount();
+
         eventRepository.save(
                 new Event(
                         event.getId(),
-                        event.getAmount(),
+                        new BigDecimal(
+                                new BigInteger(amount.getValue().toByteArray()),
+                                amount.getScale(),
+                                new MathContext(amount.getPrecision())
+                        ),
                         OffsetDateTime.parse(event.getTimestamp()).withOffsetSameInstant(ZoneOffset.UTC),
                         event.getProfileId(),
                         event.getPointId(),
