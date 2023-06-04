@@ -1,4 +1,6 @@
 package ru.itmo.common.web.dto.response;
 
-public record DefaultApiErrorResponse(String errorMessageCode, String errorMessage) {
+import java.util.List;
+
+public record DefaultApiErrorResponse(List<String> errorMessageCode, List<String> errorMessage) {
 }

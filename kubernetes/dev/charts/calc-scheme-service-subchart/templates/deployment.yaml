@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.calcSchemeService.name }}"
+  labels:
+    app.kubernetes.io/instance: "{{ .Values.calcSchemeService.name }}-app"
+    partner.reward/app: {{ .Values.calcSchemeService.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: "{{ .Values.calcSchemeService.name }}-app"
+      partner.reward/app: {{ .Values.calcSchemeService.name }}
+  template:
+    metadata:
+      labels:
+        partner.reward/app: {{ .Values.calcSchemeService.name }}
+        app.kubernetes.io/instance: "{{ .Values.calcSchemeService.name }}-app"
+    spec:
+      serviceAccountName: "{{ .Values.calcSchemeService.name }}-acc"
+      containers:
+        - name: {{ .Values.calcSchemeService.name }}
+          image: "{{ .Values.calcSchemeService.image }}:{{ .Values.calcSchemeService.imageTag }}"
+          imagePullPolicy: {{ .Values.calcSchemeService.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.calcSchemeService.port }}
+              protocol: TCP
+          env:
+            - name: SPRING_DATASOURCE_USERNAME
+              value: postgres
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: postgres
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://{{ .Values.postgresql.fullnameOverride }}:5432/{{ .Values.postgresql.auth.database }}"

@@ -1,0 +1,2 @@
+tcp:
+  9094: reward-ns/reward-kafka-external-0:9094

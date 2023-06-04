@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.report.name }}"
+  labels:
+    app.kubernetes.io/instance: "{{ .Values.report.name }}-app"
+    partner.reward/app: {{ .Values.report.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: "{{ .Values.report.name }}-app"
+      partner.reward/app: {{ .Values.report.name }}
+  template:
+    metadata:
+      labels:
+        partner.reward/app: {{ .Values.report.name }}
+        app.kubernetes.io/instance: "{{ .Values.report.name }}-app"
+    spec:
+      serviceAccountName: "{{ .Values.report.name }}-acc"
+      containers:
+        - name: {{ .Values.report.name }}
+          image: "{{ .Values.report.image }}:{{ .Values.report.imageTag }}"
+          imagePullPolicy: {{ .Values.report.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.report.port }}
+              protocol: TCP
+          env:
+            - name: REWARD_CALCULATOR_URL
+              value: "http://reward-calculator-service:8085"

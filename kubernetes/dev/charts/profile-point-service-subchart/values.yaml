@@ -1,0 +1,27 @@
+auth:
+  postgresPassword: postgres
+  database: profile_point
+
+nameOverride: "profile-point-service"
+fullnameOverride: "profile-point-service"
+profilePointService:
+    name: profile-point-service
+    image: babybenz/partner-reward
+    imageTag: profile-point-service-0.0.2-SNAPSHOT
+    imagePullPolicy: Always
+    port: 8081
+
+replicaCount: 1
+
+serviceAccount:
+  create: true
+  name: "profile-point-service"
+
+resources:
+   limits:
+     cpu: 100m
+     memory: 128Mi
+   requests:
+     cpu: 50m
+     memory: 64Mi
+

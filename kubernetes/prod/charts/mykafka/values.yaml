@@ -1,0 +1,13 @@
+kafka:
+  fullnameOverride:
+    "reward-kafka"
+  containerPorts:
+    client: 9092
+  externalAccess:
+    enabled: true
+    service:
+      type: NodePort
+      nodePorts:
+        - 31000
+      useHostIPs: true
+

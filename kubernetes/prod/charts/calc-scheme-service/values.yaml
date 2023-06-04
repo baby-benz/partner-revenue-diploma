@@ -1,0 +1,19 @@
+postgresql:
+  fullnameOverride: "calc-scheme-service-postgresql"
+  auth:
+    postgresPassword: postgres
+
+nameOverride: "calc-scheme-service"
+fullnameOverride: "calc-scheme-service"
+calcSchemeService:
+    name: calc-scheme-service
+    image: babybenz/partner-reward
+    imageTag: calc-scheme-service-0.0.2-SNAPSHOT
+    imagePullPolicy: Always
+    port: 8082
+
+replicaCount: 1
+
+serviceAccount:
+  create: true
+  name: "calc-scheme-service"

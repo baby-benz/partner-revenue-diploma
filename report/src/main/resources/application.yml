@@ -1,0 +1,4 @@
+server.port: 8084
+reward-calculator:
+  server:
+    url: ${REWARD_CALCULATOR_URL}

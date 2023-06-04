@@ -1,0 +1,19 @@
+postgresql:
+  fullnameOverride: "reward-calculator-postgresql"
+  auth:
+    postgresPassword: postgres
+
+nameOverride: reward-calculator
+fullnameOverride: reward-calculator
+rewardCalculator:
+  name: reward-calculator
+  image: babybenz/partner-reward
+  imageTag: reward-calculator-0.0.2-SNAPSHOT
+  imagePullPolicy: Always
+  port: 8085
+
+replicaCount: 1
+
+serviceAccount:
+  create: true
+  name: reward

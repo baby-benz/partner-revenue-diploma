@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.profilePointService.name }}"
+  labels:
+    app.kubernetes.io/instance: "{{ .Values.profilePointService.name }}-app"
+    partner.reward/app: {{ .Values.profilePointService.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: "{{ .Values.profilePointService.name }}-app"
+      partner.reward/app: {{ .Values.profilePointService.name }}
+  template:
+    metadata:
+      labels:
+        partner.reward/app: {{ .Values.profilePointService.name }}
+        app.kubernetes.io/instance: "{{ .Values.profilePointService.name }}-app"
+    spec:
+      serviceAccountName: "{{ .Values.profilePointService.name }}-acc"
+      containers:
+        - name: {{ .Values.profilePointService.name }}
+          image: "{{ .Values.profilePointService.image }}:{{ .Values.profilePointService.imageTag }}"
+          imagePullPolicy: {{ .Values.profilePointService.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.profilePointService.port }}
+              protocol: TCP
+          env:
+            - name: SPRING_DATASOURCE_USERNAME
+              value: postgres
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: postgres
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://{{ .Values.postgresql.fullnameOverride }}:5432/{{ .Values.postgresql.auth.database }}"
+            - name: KAFKA_BOOTSTRAP_URL
+              value: "reward-kafka:9092"
+            - name: CALC_SCHEME_URL
+              value: "http://calc-scheme-service-service:8082"

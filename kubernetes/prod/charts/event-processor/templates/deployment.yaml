@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Values.eventProcessor.name }}"
+  labels:
+    app.kubernetes.io/instance: "{{ .Values.eventProcessor.name }}-app"
+    partner.reward/app: {{ .Values.eventProcessor.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: "{{ .Values.eventProcessor.name }}-app"
+      partner.reward/app: {{ .Values.eventProcessor.name }}
+  template:
+    metadata:
+      labels:
+        partner.reward/app: {{ .Values.eventProcessor.name }}
+        app.kubernetes.io/instance: "{{ .Values.eventProcessor.name }}-app"
+    spec:
+      serviceAccountName: "{{ .Values.eventProcessor.name }}-acc"
+      containers:
+        - name: {{ .Values.eventProcessor.name }}
+          image: "{{ .Values.eventProcessor.image }}:{{ .Values.eventProcessor.imageTag }}"
+          imagePullPolicy: {{ .Values.eventProcessor.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.eventProcessor.port }}
+              protocol: TCP
+          env:
+            - name: SPRING_DATASOURCE_USERNAME
+              value: postgres
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: {{ .Values.postgresql.auth.postgresPassword }}
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://{{ .Values.postgresql.fullnameOverride }}:{{ .Values.postgresql.containerPorts.postgresql }}/{{ .Values.postgresql.auth.database }}"
+            - name: KAFKA_BOOTSTRAP_URL
+              value: "{{ .Values.global.kafka.release.name }}:{{ .Values.global.kafka.service.port }}"
+            - name: PROFILE_POINT_URL
+              value: "http://{{ .Values.global.profilePoint.release.name }}-service:{{ .Values.global.profilePoint.service.port }}"
