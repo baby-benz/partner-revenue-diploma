@@ -4,11 +4,12 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>ru.itmo</groupId>
-        <artifactId>partner-revenue-diploma</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <artifactId>partner-reward-diploma</artifactId>
+        <version>0.0.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>event-processor</artifactId>
+    <version>0.0.3-SNAPSHOT</version>
 
     <dependencies>
         <dependency>
@@ -18,8 +19,12 @@
         </dependency>
         <dependency>
             <groupId>ru.itmo</groupId>
-            <artifactId>point</artifactId>
-            <version>${point.version}</version>
+            <artifactId>profile-point-service</artifactId>
+            <version>${profile-point-service.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -48,31 +53,11 @@
     <build>
         <plugins>
             <plugin>
-                <groupId>org.xolstice.maven.plugins</groupId>
-                <artifactId>protobuf-maven-plugin</artifactId>
-                <version>0.6.1</version>
-                <configuration>
-                    <protocExecutable>protoc</protocExecutable>
-                    <protoSourceRoot>src/main/resources/schema</protoSourceRoot>
-                    <pluginId>grpc-java</pluginId>
-                    <clearOutputDirectory>true</clearOutputDirectory>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>protobuf-compile</id>
-                        <goals>
-                            <goal>compile</goal>
-                        </goals>
-                        <phase>generate-sources</phase>
-                    </execution>
-                    <execution>
-                        <id>protobuf-test-compile</id>
-                        <goals>
-                            <goal>test-compile</goal>
-                        </goals>
-                        <phase>generate-test-sources</phase>
-                    </execution>
-                </executions>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <goals>
+                    <goal>repackage</goal>
+                </goals>
             </plugin>
         </plugins>
     </build>

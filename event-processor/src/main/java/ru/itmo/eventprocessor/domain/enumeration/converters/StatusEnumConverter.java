@@ -8,18 +8,11 @@ import ru.itmo.eventprocessor.domain.enumeration.Status;
 public class StatusEnumConverter implements AttributeConverter<Status, String> {
     @Override
     public String convertToDatabaseColumn(Status status) {
-        if (status == null) {
-            return null;
-        }
-        return status.name();
+        return status.getStatusCode();
     }
 
     @Override
     public Status convertToEntityAttribute(String code) {
-        if (code == null) {
-            return null;
-        }
-
-        return Status.valueOf(Status.class, code);
+        return Status.fromStatusCode(code);
     }
 }

@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+import "proto_big_decimal.proto";
+
+option java_package = "ru.itmo.common.domain.message";
+
+message RewardMessage {
+  string event_id = 1;
+  string point_id = 2;
+  DecimalValue eventAmount = 3;
+  DecimalValue rewardAmount = 4;
+}

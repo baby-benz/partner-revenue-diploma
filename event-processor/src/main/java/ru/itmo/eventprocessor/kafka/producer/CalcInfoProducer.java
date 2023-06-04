@@ -5,8 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import ru.itmo.common.constant.KafkaTopics;
-
-import ru.itmo.eventprocessor.domain.message.CalcInfo.CalcInfoMessage;
+import ru.itmo.common.domain.message.CalcInfo;
 
 import java.util.concurrent.CountDownLatch;
 
@@ -19,7 +18,7 @@ public class CalcInfoProducer {
     @Getter
     private Long messagePublished = 0L;
 
-    public void sendMessage(CalcInfoMessage message) {
+    public void sendMessage(CalcInfo.CalcInfoMessage message) {
         kafkaTemplate.send(KafkaTopics.CALC_INFO, message.toByteArray());
         messagePublished++;
         latch.countDown();

@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+import "proto_big_decimal.proto";
+
+option java_package = "ru.itmo.common.domain.message";
+
+message CalcInfoMessage {
+  string event_id = 1;
+  DecimalValue amount = 2;
+  string profile_id = 3;
+  string point_id = 4;
+}

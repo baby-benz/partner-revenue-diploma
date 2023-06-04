@@ -1,14 +1,19 @@
+server.port: 8083
+
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/partner_revenue
-    username: postgres
-    password: postgres
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: ${SPRING_DATASOURCE_URL}
   jpa:
     hibernate:
       ddl-auto: create
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_URL}
     consumer:
       group-id: itmo.ru
       auto-offset-reset: earliest
@@ -18,6 +23,4 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer
 
-point:
-  server:
-    port: 8081
+profile-point.server.url: ${PROFILE_POINT_URL}

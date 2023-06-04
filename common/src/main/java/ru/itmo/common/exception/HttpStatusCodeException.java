@@ -4,6 +4,8 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import ru.itmo.common.exception.cause.HttpErrorCause;
 
+import java.util.List;
+
 @Getter
 public class HttpStatusCodeException extends RuntimeException {
     private final HttpErrorCause errorCause;
@@ -13,8 +15,8 @@ public class HttpStatusCodeException extends RuntimeException {
         return errorCause.getStatus();
     }
 
-    public String getMessageCode() {
-        return errorCause.getMessageCode();
+    public List<String> getMessageCodes() {
+        return errorCause.getMessageCodes();
     }
 
     public HttpStatusCodeException(HttpErrorCause errorCause, String... messageArgs) {

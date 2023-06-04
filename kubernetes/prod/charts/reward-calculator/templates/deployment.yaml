@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.rewardCalculator.name }}
+  labels:
+    app.kubernetes.io/instance: "{{ .Values.rewardCalculator.name }}-app"
+    partner.reward/app: {{ .Values.rewardCalculator.name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: "{{ .Values.rewardCalculator.name }}-app"
+      partner.reward/app: {{ .Values.rewardCalculator.name }}
+  template:
+    metadata:
+      labels:
+        partner.reward/app: {{ .Values.rewardCalculator.name }}
+        app.kubernetes.io/instance: "{{ .Values.rewardCalculator.name }}-app"
+    spec:
+      serviceAccountName: "{{ .Values.rewardCalculator.name }}-acc"
+      containers:
+        - name: {{ .Values.rewardCalculator.name }}
+          image: "{{ .Values.rewardCalculator.image }}:{{ .Values.rewardCalculator.imageTag }}"
+          imagePullPolicy: {{ .Values.rewardCalculator.imagePullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.rewardCalculator.port }}
+              protocol: TCP
+          env:
+            - name: SPRING_DATASOURCE_USERNAME
+              value: postgres
+            - name: SPRING_DATASOURCE_PASSWORD
+              value: {{ .Values.postgresql.auth.postgresPassword }}
+            - name: SPRING_DATASOURCE_URL
+              value: "jdbc:postgresql://{{ .Values.postgresql.fullnameOverride }}:{{ .Values.postgresql.containerPorts.postgresql }}/{{ .Values.postgresql.auth.database }}"
+            - name: KAFKA_BOOTSTRAP_URL
+              value: "{{ .Values.global.kafka.release.name }}:{{ .Values.global.kafka.service.port }}"
+            - name: CALC_SCHEME_URL
+              value: "http://{{ .Values.global.calcScheme.release.name }}-service:{{ .Values.global.calcScheme.service.port }}"
+            - name: PROFILE_POINT_URL
+              value: "http://{{ .Values.global.profilePoint.release.name }}-service:{{ .Values.global.profilePoint.service.port }}"
+          resources:
+            limits:
+              cpu: 100m
+              memory: 1024Mi
+            requests:
+              cpu: 50m
+              memory: 128Mi

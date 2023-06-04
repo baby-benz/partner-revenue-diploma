@@ -1,0 +1,27 @@
+postgresql:
+  auth:
+    postgresPassword: postgres
+  fullnameOverride: "event-processor-postgresql"
+
+nameOverride: "event-processor"
+fullnameOverride: "event-processor"
+eventProcessor:
+    name: event-processor
+    image: babybenz/partner-reward
+    imageTag: event-processor-0.0.3-SNAPSHOT
+    imagePullPolicy: Always
+    port: 8083
+
+replicaCount: 1
+
+serviceAccount:
+  create: true
+  name: "event-processor"
+
+resources:
+   limits:
+     cpu: 100m
+     memory: 128Mi
+   requests:
+     cpu: 50m
+     memory: 64Mi

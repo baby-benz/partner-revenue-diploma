@@ -5,47 +5,44 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
+import org.hibernate.annotations.TimeZoneStorage;
+import org.hibernate.annotations.TimeZoneStorageType;
 import ru.itmo.eventprocessor.domain.enumeration.Status;
 
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.Objects;
+import java.util.UUID;
 
 @Getter
+@Setter
 @ToString
 @Entity
 @NoArgsConstructor
 @AllArgsConstructor
 public class Event {
     @Id
-    private String id;
+    @Column(columnDefinition = "uuid")
+    private UUID id;
 
     @NotNull
-    @Column
+    @Column(scale = 6, precision = 14)
     private BigDecimal amount;
 
     @NotNull
-    @Column
-    private OffsetDateTime timestamp;
+    @TimeZoneStorage(TimeZoneStorageType.COLUMN)
+    private OffsetDateTime eventTime;
 
     @NotNull
-    @Column
-    private String profileId;
+    @Column(columnDefinition = "UUID")
+    private UUID profileId;
 
     @NotNull
-    @Column
-    private String pointId;
+    @Column(columnDefinition = "UUID")
+    private UUID pointId;
 
-    @Column
-    private Status status = Status.NOT_PROCESSED;
-
-    public Event(String id, BigDecimal amount, OffsetDateTime timestamp, String profileId, String pointId) {
-        this.id = id;
-        this.amount = amount;
-        this.timestamp = timestamp;
-        this.profileId = profileId;
-        this.pointId = pointId;
-    }
+    @Column(columnDefinition = "char(1)")
+    private Status eventStatus = Status.NOT_PROCESSED;
 
     @Override
     public boolean equals(Object o) {
@@ -53,14 +50,14 @@ public class Event {
         if (!(o instanceof Event event)) return false;
         return event.getAmount().compareTo(getAmount()) == 0 &&
                 getId().equals(event.getId()) &&
-                getTimestamp().equals(event.getTimestamp()) &&
+                getEventTime().equals(event.getEventTime()) &&
                 getProfileId().equals(event.getProfileId()) &&
                 getPointId().equals(event.getPointId()) &&
-                getStatus() == event.getStatus();
+                getEventStatus() == event.getEventStatus();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getAmount(), getTimestamp(), getProfileId(), getPointId(), getStatus());
+        return Objects.hash(getId(), getAmount(), getEventTime(), getProfileId(), getPointId(), getEventStatus());
     }
 }

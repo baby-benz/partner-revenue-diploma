@@ -1,9 +1,0 @@
-syntax = "proto3";
-
-option java_package = "ru.itmo.eventprocessor.domain.message";
-
-message DecimalValue {
-  uint32 scale = 1;
-  uint32 precision = 2;
-  bytes value = 3;
-}

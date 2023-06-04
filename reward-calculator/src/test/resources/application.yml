@@ -1,0 +1,32 @@
+server.port: 8085
+calc-scheme.server.url: http://localhost:8082
+profile-point.server.url: http://localhost:8081
+
+calc:
+  expression: amount * interest_rate + bonus
+  amount:
+    code-word: amount
+  interest-rate:
+    code-word: interest_rate
+  bonus:
+    code-word: bonus
+
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: postgres
+    password: postgres
+    url: jdbc:postgresql://localhost:5432/partner_revenue
+  jpa:
+    hibernate:
+      ddl-auto: create
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: itmo.ru
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer

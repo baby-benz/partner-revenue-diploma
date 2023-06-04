@@ -4,11 +4,15 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>ru.itmo</groupId>
-        <artifactId>partner-revenue-diploma</artifactId>
-        <version>0.0.1-SNAPSHOT</version>
+        <artifactId>partner-reward-diploma</artifactId>
+        <version>0.0.2-SNAPSHOT</version>
     </parent>
 
     <artifactId>common</artifactId>
+
+    <properties>
+        <spring-boot.repackage.skip>true</spring-boot.repackage.skip>
+    </properties>
 
     <dependencies>
         <dependency>
@@ -17,11 +21,14 @@
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-jpa</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-webflux</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.google.protobuf</groupId>
+            <artifactId>protobuf-java</artifactId>
+            <version>${protobuf.version}</version>
+        </dependency>
     </dependencies>
+
+
 </project>

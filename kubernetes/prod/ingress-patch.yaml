@@ -1,0 +1,10 @@
+spec:
+  template:
+    spec:
+      hostNetwork: true
+      containers:
+      - name: controller
+        ports:
+          - name: kafka-tcp
+            containerPort: 9094
+            hostPort: 9094

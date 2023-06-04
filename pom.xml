@@ -6,33 +6,32 @@
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.0.4</version>
-        <relativePath/> <!-- lookup parent from repository -->
+        <relativePath/>
     </parent>
 
     <groupId>ru.itmo</groupId>
-    <artifactId>partner-revenue-diploma</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <artifactId>partner-reward-diploma</artifactId>
+    <version>0.0.2-SNAPSHOT</version>
     <packaging>pom</packaging>
 
     <modules>
         <module>common</module>
-        <module>profile</module>
-        <module>point</module>
-        <module>calc-scheme</module>
+        <module>profile-point-service</module>
+        <module>calc-scheme-service</module>
         <module>event-processor</module>
-        <module>revenue-calculator</module>
+        <module>reward-calculator</module>
         <module>report</module>
-        <module>ui</module>
+        <module>test-app</module>
     </modules>
 
     <properties>
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <common.version>0.0.1-SNAPSHOT</common.version>
-        <profile.version>0.0.1-SNAPSHOT</profile.version>
-        <point.version>0.0.1-SNAPSHOT</point.version>
-        <calc-scheme.version>0.0.1-SNAPSHOT</calc-scheme.version>
+        <common.version>0.0.2-SNAPSHOT</common.version>
+        <profile-point-service.version>0.0.2-SNAPSHOT</profile-point-service.version>
+        <calc-scheme-service.version>0.0.2-SNAPSHOT</calc-scheme-service.version>
+        <reward-calculator.version>0.0.2-SNAPSHOT</reward-calculator.version>
 
         <protobuf.version>3.22.2</protobuf.version>
     </properties>
@@ -59,22 +58,6 @@
         </dependency>
     </dependencies>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-                <configuration>
-                    <excludes>
-                        <exclude>
-                            <groupId>org.projectlombok</groupId>
-                            <artifactId>lombok</artifactId>
-                        </exclude>
-                    </excludes>
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
     <repositories>
         <repository>
             <id>spring-milestones</id>
@@ -112,4 +95,35 @@
         </pluginRepository>
     </pluginRepositories>
 
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.xolstice.maven.plugins</groupId>
+                <artifactId>protobuf-maven-plugin</artifactId>
+                <version>0.6.1</version>
+                <configuration>
+                    <protocExecutable>protoc</protocExecutable>
+                    <protoSourceRoot>src/main/resources/schema</protoSourceRoot>
+                    <pluginId>grpc-java</pluginId>
+                    <clearOutputDirectory>true</clearOutputDirectory>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>protobuf-compile</id>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                        <phase>generate-sources</phase>
+                    </execution>
+                    <execution>
+                        <id>protobuf-test-compile</id>
+                        <goals>
+                            <goal>test-compile</goal>
+                        </goals>
+                        <phase>generate-test-sources</phase>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

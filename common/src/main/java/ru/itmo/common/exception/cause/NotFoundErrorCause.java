@@ -1,17 +1,11 @@
 package ru.itmo.common.exception.cause;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 
-@RequiredArgsConstructor
-public enum NotFoundErrorCause implements HttpErrorCause {
-    PROFILE_NOT_FOUND("profile-not-found"),
-    POINT_NOT_FOUND("point-not-found"),
-    POINT_BY_ID_AND_PROFILE_ID_NOT_FOUND("point-by-id-and-profile-id-not-found"),
-    EVENT_NOT_FOUND("event-not-found"),
-    CALC_SCHEME_NOT_FOUND("calc-scheme-not-found");
+import java.util.List;
 
-    private final String errorMessageCode;
+public class NotFoundErrorCause implements HttpErrorCause {
+    private final List<String> errorMessageCodes;
 
     @Override
     public HttpStatus getStatus() {
@@ -19,7 +13,11 @@ public enum NotFoundErrorCause implements HttpErrorCause {
     }
 
     @Override
-    public String getMessageCode() {
-        return this.errorMessageCode;
+    public List<String> getMessageCodes() {
+        return this.errorMessageCodes;
+    }
+
+    public NotFoundErrorCause(List<NotFound> causes) {
+        this.errorMessageCodes = causes.stream().map(Cause::getMessageCode).toList();
     }
 }

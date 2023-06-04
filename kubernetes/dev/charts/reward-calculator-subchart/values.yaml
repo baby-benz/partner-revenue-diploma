@@ -1,0 +1,30 @@
+
+
+nameOverride: "reward-calculator"
+fullnameOverride: "reward-calculator"
+rewardCalculator:
+    name: reward-calculator
+    image: babybenz/partner-reward
+    imageTag: reward-calculator-0.0.2-SNAPSHOT
+    imagePullPolicy: Always
+    port: 8085
+
+replicaCount: 1
+
+serviceAccount:
+  create: true
+  name: "reward"
+
+resources:
+   limits:
+     cpu: 100m
+     memory: 128Mi
+   requests:
+     cpu: 50m
+     memory: 64Mi
+
+postgresql:
+  service:
+    ports:
+      postgresql: 5432
+  fullnameOverride: "reward-calculator-postgresql"

@@ -1,0 +1,47 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-reward
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: itmo.reward
+      http:
+        paths:
+          - path: /profile-point(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: profile-point-service-service
+                port:
+                  number: 8081
+          - path: /calc-scheme(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: calc-scheme-service-service
+                port:
+                  number: 8082
+          - path: /event(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: event-processor-service
+                port:
+                  number: 8083
+          - path: /calculator(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: reward-calculator-service
+                port:
+                  number: 8085
+          - path: /report(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: report-service
+                port:
+                  number: 8084

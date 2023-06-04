@@ -1,0 +1,33 @@
+server.port: 8085
+calc-scheme.server.url: ${CALC_SCHEME_URL}
+profile-point.server.url: ${PROFILE_POINT_URL}
+
+calc:
+  expression: amount * interest_rate + bonus
+  amount:
+    code-word: amount
+  interest-rate:
+    code-word: interest_rate
+  bonus:
+    code-word: bonus
+
+spring:
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    url: ${SPRING_DATASOURCE_URL}
+  jpa:
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_URL}
+    consumer:
+      group-id: itmo.ru
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.ByteArraySerializer

@@ -1,0 +1,35 @@
+# Default values for reward.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+global:
+  calcScheme:
+    release:
+      name: calc-scheme-service
+    service:
+      port: 8082
+  profilePoint:
+    release:
+      name: profile-point-service
+    service:
+      port: 8081
+  eventProcessor:
+    release:
+      name: event-processor
+    service:
+      port: 8083
+  rewardCalculator:
+    release:
+      name: reward-calculator
+    service:
+      port: 8085
+  report:
+    release:
+      name: report
+    service:
+      port: 8084
+  kafka:
+    release:
+      name: reward-kafka
+    service:
+      port: 9092

@@ -1,6 +1,5 @@
 package ru.itmo.eventprocessor;
 
-import com.google.protobuf.ByteString;
 import com.google.protobuf.InvalidProtocolBufferException;
 import org.apache.kafka.clients.consumer.Consumer;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -10,6 +9,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.hamcrest.CoreMatchers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -21,13 +21,14 @@ import org.springframework.kafka.test.context.EmbeddedKafka;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.itmo.common.constant.Endpoint;
 import ru.itmo.common.constant.KafkaTopics;
-import ru.itmo.common.web.client.PointClient;
+import ru.itmo.common.domain.message.CalcInfo;
+import ru.itmo.common.domain.message.PaymentEvent;
+import ru.itmo.common.domain.message.ProtoBigDecimal;
+import ru.itmo.common.service.util.BigDecimalUtil;
+import ru.itmo.common.web.client.ProfilePointClient;
 import ru.itmo.eventprocessor.domain.enumeration.Status;
-import ru.itmo.eventprocessor.domain.message.CalcInfo.CalcInfoMessage;
-import ru.itmo.eventprocessor.domain.message.Event.EventMessage;
-import ru.itmo.eventprocessor.kafka.consumer.EventConsumer;
+import ru.itmo.eventprocessor.kafka.consumer.PaymentEventConsumer;
 import ru.itmo.eventprocessor.kafka.producer.CalcInfoProducer;
-import ru.itmo.eventprocessor.domain.message.BigDecimal.DecimalValue;
 
 import java.math.BigDecimal;
 import java.time.Duration;
@@ -40,6 +41,7 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.doReturn;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -52,11 +54,11 @@ class EventLifecycleTest {
     @Autowired
     MockMvc mockMvc;
     @Autowired
-    EventConsumer consumer;
+    PaymentEventConsumer consumer;
     @Autowired
     CalcInfoProducer producer;
     @MockBean
-    PointClient pointClient;
+    ProfilePointClient profilePointClient;
 
     @Value("${spring.kafka.consumer.group-id")
     private String groupId;
@@ -73,24 +75,20 @@ class EventLifecycleTest {
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class.getName());
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, ByteArrayDeserializer.class.getName());
         calcInfoConsumer = new KafkaConsumer<>(props);
-        calcInfoConsumer.subscribe(Collections.singletonList(KafkaTopics.CALC_INFO));
+        calcInfoConsumer.subscribe(Collections.singletonList(KafkaTopics.PAYMENT_EVENT));
     }
 
     @Test
-    void whenEventReceived_then_controllerReturnsEvent_and_eventSent() throws Exception {
+    void when_eventReceived_then_controllerReturnsEvent_and_eventSent() throws Exception {
         final String eventId = UUID.randomUUID().toString();
         final BigDecimal amount = BigDecimal.valueOf(300.d);
         final OffsetDateTime timestamp = OffsetDateTime.now(ZoneId.systemDefault());
         final String profileId = UUID.randomUUID().toString();
         final String pointId = UUID.randomUUID().toString();
 
-        final DecimalValue amountProto = DecimalValue.newBuilder()
-                .setScale(amount.scale())
-                .setPrecision(amount.precision())
-                .setValue(ByteString.copyFrom(amount.unscaledValue().toByteArray()))
-                .build();
+        final ProtoBigDecimal.DecimalValue amountProto = BigDecimalUtil.toProtoDecimalValue(amount);
 
-        final EventMessage message = EventMessage.newBuilder()
+        final PaymentEvent.PaymentEventMessage message = PaymentEvent.PaymentEventMessage.newBuilder()
                 .setId(eventId)
                 .setAmount(amountProto)
                 .setTimestamp(timestamp.toString())
@@ -98,13 +96,20 @@ class EventLifecycleTest {
                 .setPointId(pointId)
                 .build();
 
-        template.send(KafkaTopics.EVENT, message.toByteArray());
+        doReturn(true).when(profilePointClient).pointAndProfileMatches(Mockito.anyString(), Mockito.anyString());
+
+        template.send(KafkaTopics.PAYMENT_EVENT, message.toByteArray());
 
         boolean messageConsumed = consumer.getLatch().await(10, TimeUnit.SECONDS);
         boolean messagePublished = producer.getLatch().await(10, TimeUnit.SECONDS);
 
         String expectedTimestampString = timestamp.atZoneSameInstant(ZoneId.systemDefault())
                 .format(DateTimeFormatter.ISO_ZONED_DATE_TIME);
+
+        assertTrue(messageConsumed);
+        assertTrue(messagePublished);
+        assertEquals(message, consumer.getEventPayload());
+        assertEquals(1L, producer.getMessagePublished());
 
         mockMvc.perform(get(Endpoint.EventProcessor.GET_FULL, eventId)
                 .accept(MediaType.APPLICATION_JSON)
@@ -122,13 +127,9 @@ class EventLifecycleTest {
                 jsonPath("$.pointId").value(pointId),
                 jsonPath("$.status").value(Status.NOT_PROCESSED.name())
         );
-        assertTrue(messageConsumed);
-        assertTrue(messagePublished);
-        assertEquals(message, consumer.getEventPayload());
-        assertEquals(1L, producer.getMessagePublished());
 
-        var expectedCalcInfo = CalcInfoMessage.newBuilder()
-                .setId(eventId)
+        var expectedCalcInfo = CalcInfo.CalcInfoMessage.newBuilder()
+                .setEventId(eventId)
                 .setAmount(amountProto)
                 .setProfileId(profileId)
                 .setPointId(pointId)
@@ -136,7 +137,7 @@ class EventLifecycleTest {
 
         calcInfoConsumer.poll(Duration.ofMillis(300)).forEach(record -> {
             try {
-                assertEquals(expectedCalcInfo, CalcInfoMessage.parseFrom(record.value()));
+                assertEquals(expectedCalcInfo, CalcInfo.CalcInfoMessage.parseFrom(record.value()));
             } catch (InvalidProtocolBufferException e) {
                 e.printStackTrace();
             }
